@@ -1,0 +1,127 @@
+@charset "utf-8";
+@-ms-viewport {
+  width: device-width;
+}
+@viewport {
+  width: device-width;
+}
+
+* {
+  box-sizing: border-box;
+  font-size: inherit;
+  line-height: inherit;
+  font-weight: normal;
+  color: currentcolor;
+  border-color: currentColor;
+  font-family: inherit;
+  margin: 0;
+}
+
+::before,
+::after {
+  text-decoration: inherit;
+  vertical-align: inherit;
+}
+
+html {
+  -webkit-text-decoration-skip: ink;
+  text-decoration-skip-ink: auto;
+  font-display: optional;
+  font-size: 150%;
+  word-break: break-word;
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+a {
+  background-color: transparent;
+}
+
+strong,
+b {
+  font-weight: bold;
+}
+em,
+i {
+  font-style: italic;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+svg:not([fill]) {
+  fill: currentColor;
+}
+
+abbr[title] {
+  text-decoration: underline;
+  text-decoration: underline dotted;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+sub,
+sup {
+  font-size: 0.75em;
+  line-height: 1em;
+}
+sub {
+  vertical-align: bottom;
+}
+sup {
+  vertical-align: top;
+}
+
+ol,
+ul {
+  padding-left: 1.25em;
+}
+
+nav ol,
+nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+a,
+area,
+button,
+input,
+label,
+select,
+summary,
+textarea,
+[tabindex] {
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+}
+
+textarea {
+  resize: vertical;
+}
+
+[aria-busy="true"] {
+  cursor: progress;
+}
+
+[aria-controls] {
+  cursor: pointer;
+}
+
+[aria-disabled="true"],
+[disabled] {
+  cursor: default;
+}
+
+[aria-hidden="false"][hidden] {
+  display: initial;
+}
+
+[aria-hidden="false"][hidden]:not(:focus) {
+  clip: rect(0, 0, 0, 0);
+  position: absolute;
+}
