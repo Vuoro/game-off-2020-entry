@@ -43,7 +43,7 @@ const World = () => {
     <>
       <h1>POHOJOLA</h1>
       {hexesInRadius(16).map((hex) => (
-        <Ground coordinates={hex} />
+        <Ground key={hex} coordinates={hex} />
       ))}
     </>
   );
