@@ -2,6 +2,7 @@ import { unstable_createRoot } from "react-dom";
 import "./reset.css";
 import "./index.css";
 import App from "./App";
+import "./helpers/spamConsole.js";
 // import reportWebVitals from './reportWebVitals';
 
 unstable_createRoot(document.getElementById("root")).render(<App />);

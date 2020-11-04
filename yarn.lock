@@ -2911,6 +2911,26 @@ camelcase@^6.0.0, camelcase@^6.1.0:
   resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-6.1.0.tgz#27dc176173725fb0adf8a48b647f4d7871944d78"
   integrity sha512-WCMml9ivU60+8rEJgELlFp1gxFcEGxwYleE3bziHEDeqsqAWGHdimB7beBFGjLzVNgPGyDsfgXLQEYMpmIFnVQ==
 
+camera-picking-ray@^1.0.0:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/camera-picking-ray/-/camera-picking-ray-1.0.1.tgz#49567a4edc2de5bc13e4b6fd959520bf13a30490"
+  integrity sha1-SVZ6Ttwt5bwT5Lb9lZUgvxOjBJA=
+  dependencies:
+    camera-unproject "^1.0.1"
+    gl-vec3 "^1.0.3"
+
+camera-project@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/camera-project/-/camera-project-1.0.2.tgz#d1d696c5aa164cee92e21bb922aba52b6c0a25de"
+  integrity sha1-0daWxaoWTO6S4hu5IqulK2wKJd4=
+  dependencies:
+    gl-vec4 "^1.0.1"
+
+camera-unproject@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/camera-unproject/-/camera-unproject-1.0.1.tgz#86927a9d6d5340a8c9e36da840f7ccb6d6da12cf"
+  integrity sha1-hpJ6nW1TQKjJ422oQPfMttbaEs8=
+
 caniuse-api@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/caniuse-api/-/caniuse-api-3.0.0.tgz#5e4d90e2274961d46291997df599e3ed008ee4c0"
@@ -3841,6 +3861,11 @@ define-property@^2.0.2:
   dependencies:
     is-descriptor "^1.0.2"
     isobject "^3.0.1"
+
+defined@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/defined/-/defined-1.0.0.tgz#c98d9bcef75674188e110969151199e39b1fa693"
+  integrity sha1-yY2bzvdWdBiOEQlpFRGZ45sfppM=
 
 del@^4.1.1:
   version "4.1.1"
@@ -5119,6 +5144,21 @@ getpass@^0.1.1:
   integrity sha1-Xv+OPmhNVprkyysSgmBOi6YhSfo=
   dependencies:
     assert-plus "^1.0.0"
+
+gl-mat4@^1.1.3:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/gl-mat4/-/gl-mat4-1.2.0.tgz#49d8a7636b70aa00819216635f4a3fd3f4669b26"
+  integrity sha512-sT5C0pwB1/e9G9AvAoLsoaJtbMGjfd/jfxo8jMCKqYYEnjZuFvqV5rehqar0538EmssjdDeiEWnKyBSTw7quoA==
+
+gl-vec3@^1.0.2, gl-vec3@^1.0.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/gl-vec3/-/gl-vec3-1.1.3.tgz#a47c62f918774a06cbed1b65bcd0288ecbb03826"
+  integrity sha512-jduKUqT0SGH02l8Yl+mV1yVsDfYgQAJyXGxkJQGyxPLHRiW25DwVIRPt6uvhrEMHftJfqhqKthRcyZqNEl9Xdw==
+
+gl-vec4@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/gl-vec4/-/gl-vec4-1.0.1.tgz#97d96878281b14b532cbce101785dfd1cb340964"
+  integrity sha1-l9loeCgbFLUyy84QF4Xf0cs0CWQ=
 
 glob-parent@^3.1.0:
   version "3.1.0"
@@ -7475,6 +7515,11 @@ oauth-sign@~0.9.0:
   resolved "https://registry.yarnpkg.com/oauth-sign/-/oauth-sign-0.9.0.tgz#47a7b016baa68b5fa0ecf3dee08a85c679ac6455"
   integrity sha512-fexhUFFPTGV8ybAtSIGbV6gOkSv8UtRbDBnAyLQw4QPKkgNlsH2ByPGtMUqdWkos6YCRmAqViwgZrJc/mRDzZQ==
 
+object-assign@^2.0.0:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-2.1.1.tgz#43c36e5d569ff8e4816c4efa8be02d26967c18aa"
+  integrity sha1-Q8NuXVaf+OSBbE76i+AtJpZ8GKo=
+
 object-assign@^4.0.1, object-assign@^4.1.0, object-assign@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz#2109adc7965887cfc05cbbd442cac8bfbb360863"
@@ -7909,6 +7954,20 @@ performance-now@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
   integrity sha1-Ywn04OX6kT7BxpMHrjZLSzd8nns=
+
+perspective-camera@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/perspective-camera/-/perspective-camera-2.0.1.tgz#7593e47eba0b7038b81ce698db344f125a3b3625"
+  integrity sha1-dZPkfroLcDi4HOaY2zRPElo7NiU=
+  dependencies:
+    camera-picking-ray "^1.0.0"
+    camera-project "^1.0.2"
+    camera-unproject "^1.0.1"
+    defined "^1.0.0"
+    gl-mat4 "^1.1.3"
+    gl-vec3 "^1.0.3"
+    object-assign "^2.0.0"
+    ray-3d "^1.0.2"
 
 picomatch@^2.0.4, picomatch@^2.0.5, picomatch@^2.2.1, picomatch@^2.2.2:
   version "2.2.2"
@@ -8901,6 +8960,43 @@ raw-body@2.4.0:
     http-errors "1.7.2"
     iconv-lite "0.4.24"
     unpipe "1.0.0"
+
+ray-3d@^1.0.2:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/ray-3d/-/ray-3d-1.1.1.tgz#73801135b567866850881a5c06655853f2e10273"
+  integrity sha1-c4ARNbVnhmhQiBpcBmVYU/LhAnM=
+  dependencies:
+    gl-vec3 "^1.0.3"
+    ray-aabb-intersection "^1.0.1"
+    ray-plane-intersection "^1.0.0"
+    ray-sphere-intersection "^1.0.0"
+    ray-triangle-intersection "^1.0.3"
+
+ray-aabb-intersection@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/ray-aabb-intersection/-/ray-aabb-intersection-1.0.1.tgz#2eb510228d7d9222fdc8167e6737aad73666dcc7"
+  integrity sha1-LrUQIo19kiL9yBZ+Zzeq1zZm3Mc=
+
+ray-plane-intersection@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/ray-plane-intersection/-/ray-plane-intersection-1.0.0.tgz#763be1cd04eddad1847af6d5e70941b7302a47bb"
+  integrity sha1-djvhzQTt2tGEevbV5wlBtzAqR7s=
+  dependencies:
+    gl-vec3 "^1.0.3"
+
+ray-sphere-intersection@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/ray-sphere-intersection/-/ray-sphere-intersection-1.0.0.tgz#7f233d1d4dbaf5265757c9826532f53b1e4eeaca"
+  integrity sha1-fyM9HU269SZXV8mCZTL1Ox5O6so=
+  dependencies:
+    gl-vec3 "^1.0.3"
+
+ray-triangle-intersection@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/ray-triangle-intersection/-/ray-triangle-intersection-1.0.3.tgz#8ea8f2f383580bdabd36f5e51359cf71e1074d34"
+  integrity sha1-jqjy84NYC9q9NvXlE1nPceEHTTQ=
+  dependencies:
+    gl-vec3 "^1.0.2"
 
 react-app-polyfill@^2.0.0:
   version "2.0.0"

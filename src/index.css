@@ -1,0 +1,34 @@
+html {
+  --black: #32203e;
+  --white: #eae8dc;
+  --grey: #8198c7;
+  --blue: #506ebd;
+
+  background-color: var(--black);
+  color: var(--white);
+  font-family: serif;
+}
+
+.canvas {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: -1;
+  animation: fade-in 618ms ease-out both;
+  image-rendering: optimizeSpeed;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
