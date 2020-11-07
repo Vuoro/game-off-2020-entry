@@ -12,19 +12,17 @@ import {
 import { simplexNoise2d } from "./helpers/glsl-noise.shader.js";
 import { useCommand } from "./Command.js";
 import { hexDirections, pointyToPixel } from "./helpers/hexes.js";
+import { waterLevel, heightScale, tileBlendingThreshold } from "./World.js";
 
 const { max, min } = Math;
-
-const waterLevel = 0.5;
-export const heightScale = 100 / 3;
-const threshold = 0.02;
 const temp = [];
 
 const getTile = (coordinates) => {
   return {
     ...coordinates,
     pixelCoordinates: pointyToPixel(coordinates),
-    height: waterLevel + Math.random() * 0.05,
+    height:
+      waterLevel + Math.sin(coordinates[0]) * Math.cos(coordinates[1]) * 0.5,
     flooded: false,
   };
 };
@@ -75,7 +73,7 @@ const Ground = ({ coordinates = [0, 0] }) => {
     );
 
     const dontBlend =
-      neighborFlooded || largestHeight - smallestHeight > threshold;
+      neighborFlooded || largestHeight - smallestHeight > tileBlendingThreshold;
 
     const finalHeight =
       (dontBlend ? -finalNeighborHeight : finalNeighborHeight) * heightScale;
@@ -330,8 +328,8 @@ export const drawGround = {
 
       // Clouds
       vec2 cloudOffset = vec2(-time * 0.013, 0.0);
-      float cloudNoise = simplexNoise2d(worldPosition.xy * 0.013 + cloudOffset) 
-        * simplexNoise2d(worldPosition.xy * 0.012 + cloudOffset);
+      float cloudNoise = simplexNoise2d(worldPosition.xy * 0.015 + cloudOffset) 
+        * simplexNoise2d(worldPosition.xy * 0.013 + cloudOffset);
 
       lightEffects[0] = lightEffect;
       lightEffects[1] = max(0.0, cloudNoise);

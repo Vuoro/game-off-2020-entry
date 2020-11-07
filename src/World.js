@@ -3,30 +3,35 @@ import { useEffect } from "react";
 import Ground from "./Ground.js";
 import { useCamera } from "./Camera.js";
 import { useRenderer, useLoop } from "./WebGL.js";
-import { pointOnCircle } from "./helpers/maths.js";
+import { pointOnCircle, normalizeInPlace } from "./helpers/maths.js";
 import { hexesInRadius } from "./helpers/hexes.js";
 import { useScroller } from "./helpers/useScroller.js";
 
+const viewRadius = 24;
 const cameraFocus = [0, 0, 0.618];
-const cameraDistance = 15;
-const cameraHeight = 35;
+const cameraOffset = 10;
+const cameraHeight = 15;
 let cameraAngle = 0;
+
+export const waterLevel = 0.5;
+export const heightScale = 2;
+export const tileBlendingThreshold = 0.4;
 
 const World = () => {
   const { updateAllUniforms, setClear, clear } = useRenderer();
   const camera = useCamera();
 
   const handleCamera = () => {
-    pointOnCircle(cameraDistance, cameraAngle, camera.position);
+    pointOnCircle(cameraOffset, cameraAngle, camera.position);
     camera.position[0] += cameraFocus[0];
     camera.position[1] += cameraFocus[1];
-    camera.position[2] = cameraHeight + cameraFocus[2];
+    camera.position[2] = cameraHeight + cameraFocus[2] * heightScale;
     camera.lookAt(cameraFocus);
     camera.up[0] = 0;
     camera.up[1] = 0;
     camera.up[2] = 1;
-    //   camera.direction[2] += cameraShift;
-    //   normalizeInPlace(camera.direction);
+    camera.direction[2] += cameraOffset * 0.005;
+    normalizeInPlace(camera.direction);
     camera.update();
 
     updateAllUniforms("projectionView", camera.projView);
@@ -54,7 +59,7 @@ const World = () => {
     <>
       <div style={{ height: "1000vmax" }} />
 
-      {hexesInRadius(16).map((hex) => (
+      {hexesInRadius(viewRadius).map((hex) => (
         <Ground key={hex} coordinates={hex} />
       ))}
     </>
