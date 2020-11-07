@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { rotate2d } from "./helpers/glsl-transforms.shader.js";
 import conditionals from "./helpers/glsl-conditionals.shader.js";
 import { round, fStep, fEdge, fX, fY } from "./helpers/glsl-helpers.shader.js";
@@ -11,32 +12,31 @@ import {
 } from "./helpers/maths.js";
 import { simplexNoise2d } from "./helpers/glsl-noise.shader.js";
 import { useCommand } from "./Command.js";
-import { hexDirections, pointyToPixel } from "./helpers/hexes.js";
-import { waterLevel, heightScale, tileBlendingThreshold } from "./World.js";
+import { hexDirections } from "./helpers/hexes.js";
+import {
+  waterLevel,
+  heightScale,
+  tileBlendingThreshold,
+  getTile,
+} from "./World.js";
 
 const { max, min } = Math;
 const temp = [];
 
-const getTile = (coordinates) => {
-  return {
-    ...coordinates,
-    pixelCoordinates: pointyToPixel(coordinates),
-    height:
-      waterLevel + Math.sin(coordinates[0]) * Math.cos(coordinates[1]) * 0.5,
-    flooded: false,
-  };
-};
-
-const Ground = ({ coordinates = [0, 0] }) => {
-  const { pixelCoordinates, height } = getTile(coordinates);
+const Ground = memo(({ x, y }) => {
+  const { coordinates, pixelCoordinates, height, flooded } = getTile(x, y);
   const finalCoordinates = [
     pixelCoordinates[0],
     pixelCoordinates[1],
     height * heightScale,
   ];
   const Ground = useCommand(drawGround);
-  const shadingVector = [0, 0, 0];
 
+  if (flooded) {
+    return null;
+  }
+
+  const shadingVector = [0, 0, 0];
   const edges1 = [0, 0, 0];
   const edges2 = [0, 0, 0];
 
@@ -104,7 +104,7 @@ const Ground = ({ coordinates = [0, 0] }) => {
       edges2={edges2}
     />
   );
-};
+});
 
 export default Ground;
 
