@@ -108,7 +108,9 @@ export const getTile = (x, y) => {
 
   let height = noise(pixelCoordinates);
 
-  const flooded = 1 - abs(noise(coordinates, 0.01) * 2 - 1) > 0.91;
+  const flooded =
+    1 - abs(noise(coordinates, 0.001) * 2 - 1) >
+    0.99 - noise(coordinates, 0.01) * 0.09;
 
   return {
     coordinates,
