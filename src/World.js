@@ -6,20 +6,24 @@ import Swiper from "./Swiper.js";
 import { useCamera } from "./Camera.js";
 import { useRenderer, useLoop } from "./WebGL.js";
 import { pointOnCircle, normalizeInPlace, clamp } from "./helpers/maths.js";
-import { hexesInRadius, pointyToPixel } from "./helpers/hexes.js";
+import {
+  hexesInRadius,
+  pointyToPixel,
+  hexDirections,
+} from "./helpers/hexes.js";
 import { useScroller } from "./helpers/useScroller.js";
 
 const { abs, PI } = Math;
 
-const viewRadius = 8;
+const viewRadius = 16;
 const cameraFocus = [0, 0, 0];
-const cameraOffset = 10;
-const cameraHeight = 15;
+const cameraOffset = 8;
+const cameraHeight = 21;
 let cameraAngle = 0;
 
 export const waterLevel = 0.5;
-export const heightScale = 10;
-export const tileBlendingThreshold = 0.4;
+export const heightScale = 8;
+export const tileBlendingThreshold = 0.146;
 
 const World = () => {
   const [location, setLocation] = useState([0, 0]);
@@ -99,10 +103,7 @@ export const getTile = (x, y) => {
 
   let height = noise(pixelCoordinates);
 
-  const flooded = 1 - abs(noise(pixelCoordinates) * 2 - 1) > 0.854;
-  if (flooded) {
-    height -= tileBlendingThreshold;
-  }
+  const flooded = 1 - abs(noise(coordinates, 0.01) * 2 - 1) > 0.91;
 
   return {
     coordinates,
@@ -116,10 +117,10 @@ export const getTile = (x, y) => {
 const noiseGenerator = new SimplexNoise("POHOJOLA");
 export const noise = (
   coordinates,
+  frequency = 0.021,
   iterations = 3,
   persistence = 0.618,
   amplitude = 0.764,
-  frequency = 0.021,
   frequencyMultiplier = 2
 ) => {
   let noise = 0;

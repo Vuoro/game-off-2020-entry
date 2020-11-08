@@ -16,7 +16,6 @@ import { hexDirections } from "./helpers/hexes.js";
 import { heightScale, tileBlendingThreshold, getTile } from "./World.js";
 
 const { max, min, abs } = Math;
-const temp = [];
 
 const Ground = memo(({ x, y }) => {
   const { coordinates, pixelCoordinates, height, flooded } = getTile(x, y);
@@ -32,22 +31,24 @@ const Ground = memo(({ x, y }) => {
   const edges2 = [0, 0, 0];
 
   for (let index = 0; index < 6; index++) {
-    temp[0] = coordinates[0] + hexDirections[index % 6][0];
-    temp[1] = coordinates[1] + hexDirections[index % 6][1];
     const {
       height: neighborHeight,
       pixelCoordinates,
       flooded: neighborFlooded,
-    } = getTile(temp);
+    } = getTile(
+      coordinates[0] + hexDirections[index % 6][0],
+      coordinates[1] + hexDirections[index % 6][1]
+    );
 
-    temp[0] = coordinates[0] + hexDirections[(index + 1) % 6][0];
-    temp[1] = coordinates[1] + hexDirections[(index + 1) % 6][1];
-    const { height: nextNeighborHeight } = getTile(temp);
+    const { height: nextNeighborHeight } = getTile(
+      coordinates[0] + hexDirections[(index + 1) % 6][0],
+      coordinates[1] + hexDirections[(index + 1) % 6][1]
+    );
 
     const smallestHeight = min(height, neighborHeight, nextNeighborHeight);
     const largestHeight = max(height, neighborHeight, nextNeighborHeight);
 
-    const dontBlend =
+    let dontBlend =
       neighborFlooded !== flooded ||
       abs(largestHeight - smallestHeight) > tileBlendingThreshold;
 
@@ -158,19 +159,19 @@ export const drawGround = {
     attribute highp vec4 shadingVector;
     attribute highp vec3 edges1;
     attribute highp vec3 edges2;
-    attribute lowp vec2 edgeIndex;
-    attribute lowp float shouldDropDownFloat;
-    attribute lowp float isExtensionFloat;
-    attribute lowp float flooded;
+    attribute highp vec2 edgeIndex;
+    attribute highp float shouldDropDownFloat;
+    attribute highp float isExtensionFloat;
+    attribute highp float flooded;
     uniform highp mat4 projectionView;
     uniform highp vec3 cameraPosition;
     uniform highp float time;
-    uniform lowp vec3 light;
+    uniform highp vec3 light;
     varying highp vec3 uv;
     varying highp vec3 edgeUv;
     varying highp vec4 lightEffects;
-    varying lowp float isExtensionFloatOut;
-    varying lowp float isFloodedFloatOut;
+    varying highp float isExtensionFloatOut;
+    varying highp float isFloodedFloatOut;
 
     #define PI 3.1415926535897932384626433832795
     #define TAU 6.28318530717958647693
@@ -294,7 +295,7 @@ export const drawGround = {
       normal += down * (previousShading + nextShading) * 0.5;
       normal -= forward * heightDifference;
       
-      float tileShading = max(0.0, dot(light, shadingVector.xyz)) * shadingVector.w * 2.0;
+      float tileShading = max(0.0, dot(light, shadingVector.xyz)) * shadingVector.w;
       normal += down * tileShading;
       
       normal = normalize(normal);
@@ -325,8 +326,8 @@ export const drawGround = {
     varying highp vec3 uv;
     varying highp vec3 edgeUv;
     varying highp vec4 lightEffects;
-    varying lowp float isExtensionFloatOut;
-    varying lowp float isFloodedFloatOut;
+    varying highp float isExtensionFloatOut;
+    varying highp float isFloodedFloatOut;
 
     #define PI 3.1415926535897932384626433832795
     #define TAU 6.28318530717958647693
