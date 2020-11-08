@@ -50,7 +50,7 @@ const Ground = memo(({ x, y }) => {
 
     let dontBlend =
       neighborFlooded !== flooded ||
-      abs(largestHeight - smallestHeight) > tileBlendingThreshold;
+      (!flooded && abs(largestHeight - smallestHeight) > tileBlendingThreshold);
 
     const finalHeight = neighborHeight * heightScale;
 
