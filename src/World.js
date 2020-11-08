@@ -5,18 +5,20 @@ import Ground from "./Ground.js";
 import Swiper from "./Swiper.js";
 import { useCamera } from "./Camera.js";
 import { useRenderer, useLoop } from "./WebGL.js";
-import { pointOnCircle, normalizeInPlace } from "./helpers/maths.js";
+import { pointOnCircle, normalizeInPlace, clamp } from "./helpers/maths.js";
 import { hexesInRadius, pointyToPixel } from "./helpers/hexes.js";
 import { useScroller } from "./helpers/useScroller.js";
 
-const viewRadius = 24;
+const { abs, PI } = Math;
+
+const viewRadius = 8;
 const cameraFocus = [0, 0, 0];
 const cameraOffset = 10;
 const cameraHeight = 15;
 let cameraAngle = 0;
 
 export const waterLevel = 0.5;
-export const heightScale = 2;
+export const heightScale = 10;
 export const tileBlendingThreshold = 0.4;
 
 const World = () => {
@@ -53,7 +55,7 @@ const World = () => {
   }, [handleCamera]);
 
   const handleScroll = ({ distanceChange }) => {
-    cameraAngle -= (distanceChange / 500) % (Math.PI * 2);
+    cameraAngle -= (distanceChange / 500) % (PI * 2);
     handleCamera();
   };
   useScroller(undefined, handleScroll, true);
@@ -71,7 +73,7 @@ const World = () => {
 
   return (
     <>
-      <div style={{ height: "1000vmax" }} />
+      <div style={{ height: "1000vmax", width: "1000vmax" }} />
 
       <Swiper x={cameraFocus[0]} y={cameraFocus[1]} z={cameraFocus[2]} />
 
@@ -95,8 +97,12 @@ export const getTile = (x, y) => {
   const coordinates = [x, y];
   const pixelCoordinates = pointyToPixel(coordinates);
 
-  const height = waterLevel + noise(pixelCoordinates) * 0.499;
-  const flooded = height < waterLevel;
+  let height = noise(pixelCoordinates);
+
+  const flooded = 1 - abs(noise(pixelCoordinates) * 2 - 1) > 0.854;
+  if (flooded) {
+    height -= tileBlendingThreshold;
+  }
 
   return {
     coordinates,
@@ -110,10 +116,10 @@ export const getTile = (x, y) => {
 const noiseGenerator = new SimplexNoise("POHOJOLA");
 export const noise = (
   coordinates,
-  iterations = 10,
+  iterations = 3,
   persistence = 0.618,
   amplitude = 0.764,
-  frequency = 0.09,
+  frequency = 0.021,
   frequencyMultiplier = 2
 ) => {
   let noise = 0;
@@ -129,5 +135,5 @@ export const noise = (
     frequency *= frequencyMultiplier;
   }
 
-  return noise / maxAmplitude;
+  return clamp((noise / maxAmplitude) * 0.5 + 0.5, 0, 1);
 };

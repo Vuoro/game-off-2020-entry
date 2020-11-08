@@ -13,14 +13,9 @@ import {
 import { simplexNoise2d } from "./helpers/glsl-noise.shader.js";
 import { useCommand } from "./Command.js";
 import { hexDirections } from "./helpers/hexes.js";
-import {
-  waterLevel,
-  heightScale,
-  tileBlendingThreshold,
-  getTile,
-} from "./World.js";
+import { heightScale, tileBlendingThreshold, getTile } from "./World.js";
 
-const { max, min } = Math;
+const { max, min, abs } = Math;
 const temp = [];
 
 const Ground = memo(({ x, y }) => {
@@ -31,10 +26,6 @@ const Ground = memo(({ x, y }) => {
     height * heightScale,
   ];
   const Ground = useCommand(drawGround);
-
-  if (flooded) {
-    return null;
-  }
 
   const shadingVector = [0, 0, 0];
   const edges1 = [0, 0, 0];
@@ -51,32 +42,16 @@ const Ground = memo(({ x, y }) => {
 
     temp[0] = coordinates[0] + hexDirections[(index + 1) % 6][0];
     temp[1] = coordinates[1] + hexDirections[(index + 1) % 6][1];
-    const {
-      height: nextNeighborHeight,
-      flooded: nextNeighborFlooded,
-    } = getTile(temp);
+    const { height: nextNeighborHeight } = getTile(temp);
 
-    const finalNeighborHeight = neighborFlooded ? waterLevel : neighborHeight;
-    const finalNextNeighborHeight = nextNeighborFlooded
-      ? waterLevel
-      : nextNeighborHeight;
-
-    const smallestHeight = min(
-      height,
-      finalNeighborHeight,
-      finalNextNeighborHeight
-    );
-    const largestHeight = max(
-      height,
-      finalNeighborHeight,
-      finalNextNeighborHeight
-    );
+    const smallestHeight = min(height, neighborHeight, nextNeighborHeight);
+    const largestHeight = max(height, neighborHeight, nextNeighborHeight);
 
     const dontBlend =
-      neighborFlooded || largestHeight - smallestHeight > tileBlendingThreshold;
+      neighborFlooded !== flooded ||
+      abs(largestHeight - smallestHeight) > tileBlendingThreshold;
 
-    const finalHeight =
-      (dontBlend ? -finalNeighborHeight : finalNeighborHeight) * heightScale;
+    const finalHeight = neighborHeight * heightScale;
 
     const shadingCoordinates = [
       pixelCoordinates[0],
@@ -89,7 +64,7 @@ const Ground = memo(({ x, y }) => {
     const edgeIndex = 5 - ((index + 1) % 6);
     const edges = edgeIndex > 2 ? edges2 : edges1;
     const finalIndex = edgeIndex > 2 ? edgeIndex - 3 : edgeIndex;
-    edges[finalIndex] = finalHeight;
+    edges[finalIndex] = (dontBlend ? -1 : 1) * finalHeight;
   }
 
   const shadingStrength = length(shadingVector);
@@ -102,6 +77,7 @@ const Ground = memo(({ x, y }) => {
       shadingVector={shadingVector}
       edges1={edges1}
       edges2={edges2}
+      flooded={flooded}
     />
   );
 });
@@ -185,14 +161,16 @@ export const drawGround = {
     attribute lowp vec2 edgeIndex;
     attribute lowp float shouldDropDownFloat;
     attribute lowp float isExtensionFloat;
+    attribute lowp float flooded;
     uniform highp mat4 projectionView;
-    uniform highp float time;
     uniform highp vec3 cameraPosition;
+    uniform highp float time;
     uniform lowp vec3 light;
     varying highp vec3 uv;
     varying highp vec3 edgeUv;
     varying highp vec4 lightEffects;
     varying lowp float isExtensionFloatOut;
+    varying lowp float isFloodedFloatOut;
 
     #define PI 3.1415926535897932384626433832795
     #define TAU 6.28318530717958647693
@@ -207,6 +185,7 @@ export const drawGround = {
       bool isExtension = isExtensionFloat == 1.0;
       isExtensionFloatOut = isExtensionFloat;
       bool shouldDropDown = shouldDropDownFloat == 1.0;
+      isFloodedFloatOut = flooded;
 
       float previousEdge = (
           edgeIndex[0] == 0.0 ? edges1[0] 
@@ -239,7 +218,6 @@ export const drawGround = {
 
       float heightDifferenceToPrevious = ownHeight - previousEdge;
       float heightDifferenceToNext = ownHeight - nextEdge;
-      float maximumTilt = min(abs(heightDifferenceToPrevious), abs(heightDifferenceToNext)) * 0.618;
       
       bool blendWithPrevious = !isMidpoint && !dontBlendWithPrevious;
       bool blendWithNext = !dontBlendWithNext;
@@ -251,14 +229,14 @@ export const drawGround = {
         ? previousEdge 
         : blendWithSomething 
           ? 0.0 
-          : ownHeight + clamp(heightDifferenceToPrevious, 0.0, maximumTilt);
+          : ownHeight;
       blendHeight += blendWithNext 
         ? nextEdge 
         : blendWithSomething 
           ? 0.0 
-          : ownHeight + clamp(heightDifferenceToNext, 0.0, maximumTilt);
+          : ownHeight;
       blendHeight *= (blendWithSomething && !blendWithBoth) ? 0.5 : 0.333333333;
-
+      
       float height = shouldDropDown /*&& !blendWithBoth*/ ? smallestHeight : blendHeight;
       height = isCenter ? ownHeight : height;
 
@@ -287,13 +265,14 @@ export const drawGround = {
           coordinates.x * 3.0 + coordinates.y * 7.0 
           + dot(normalize(position), vec2(0.0, 1.0)), 
           worldPosition.z
-        ) * vec2(0.5, 2.5)
+        ) * vec2(0.5, 0.034)
         : uv.xy;
       
       uv.xy *= 5.0;
+      uv.xy += time * flooded;
       
       // Outline effects
-      edgeUv.xy = sign(rotate2d(PI * 0.25) * position * (!isExtension ? 1.0 : 0.0));
+      edgeUv.xy = sign(rotate2d(PI * 0.25) * position * (isExtension ? 0.0 : 1.0));
       edgeUv.z = !blendWithPrevious && !blendWithNext ? 1.0 : 0.0;
       
       // Light
@@ -322,9 +301,9 @@ export const drawGround = {
       float lightEffect = dot(light, normal);
 
       // Camera effects
-      vec3 cameraToTile = worldPosition - cameraPosition;
-      vec3 cameraToTileDirection = normalize(cameraToTile);
-      float cameraDistance = length(cameraToTile);
+      // vec3 cameraToTile = worldPosition - cameraPosition;
+      // vec3 cameraToTileDirection = normalize(cameraToTile);
+      // float cameraDistance = length(cameraToTile);
 
       // Clouds
       vec2 cloudOffset = vec2(-time * 0.013, 0.0);
@@ -347,6 +326,7 @@ export const drawGround = {
     varying highp vec3 edgeUv;
     varying highp vec4 lightEffects;
     varying lowp float isExtensionFloatOut;
+    varying lowp float isFloodedFloatOut;
 
     #define PI 3.1415926535897932384626433832795
     #define TAU 6.28318530717958647693
@@ -357,6 +337,7 @@ export const drawGround = {
     void main() {
       float isExtension = isExtensionFloatOut;
       float notExtension = 1.0 - isExtension;
+      float isFlooded = isFloodedFloatOut;
 
       float outlineEffect = max(abs(edgeUv.x), abs(edgeUv.y));
 
@@ -376,13 +357,22 @@ export const drawGround = {
       const vec3 lightColor = vec3(234.0/255.0, 232.0/255.0, 220.0/255.0);
       const vec3 shadowColor = vec3(50.0/255.0, 32.0/255.0, 62.0/255.0);
       const vec3 rockColor = vec3(129.0/255.0, 152.0/255.0, 199.0/255.0);
+      const vec3 waterColor = vec3(97.0/255.0, 194.0/255.0, 212.0/255.0);
       vec3 color = mix(lightColor, rockColor, isExtension);
+      color = mix(color, waterColor, isFlooded);
 
       // Light
-      color += (light - shadow) * 0.146;
+      color = mix(color, color * lightColor * (1.0 + light), light * 0.236);
+      color = mix(color, color * shadowColor, shadow * 0.236);
       const float shadowVolumeThreshold = 0.5;
       float shadowVolume = fStep(shadowVolumeThreshold, shadow);
       color = mix(color, shadowColor, shadowVolume * 0.5);
+      
+      // Texture
+      vec3 textureColor = mix(shadowColor, lightColor, isFlooded);
+      float posture = clamp(dot(vec2(fX(noise), fY(noise)), vec2(0.0, -1.0)) * 5.0 + isExtension, 0.0, 1.0);
+      color = mix(color, textureColor, fEdge(0.5, noise) * posture);
+      // color = mix(color, textureColor, fStep(0.999, posture) * notExtension);
 
       // Outline
       float outlineness = fStep(0.9787101863, outlineEffect) * fStep(0.056, edgeUv.z);
