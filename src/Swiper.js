@@ -58,41 +58,39 @@ const Reticle = ({ cameraFocus, setLocation, location }) => {
     started = true;
   };
 
-  const handleMove = (event) => {
-    if (started) {
-      setPointerDirection(event);
-    }
-  };
-
-  const handleStop = (event) => {
-    if (started) {
-      setPointerDirection(event);
-
-      const [x, y] = pixelToPointy(cameraFocus[0], cameraFocus[1]);
-      if (x !== location[0] || y !== location[1]) {
-        setLocation([x, y]);
-      }
-
-      pointerDirection[0] = 0;
-      pointerDirection[1] = 0;
-      started = false;
-      cameraFocus[0] = origin[0];
-      cameraFocus[1] = origin[1];
-      cameraFocus[2] = origin[2];
-    }
-  };
-
   useEffect(() => {
+    const handleMove = (event) => {
+      if (started) {
+        setPointerDirection(event);
+      }
+    };
+
+    const handleStop = (event) => {
+      if (started) {
+        setPointerDirection(event);
+
+        const [x, y] = pixelToPointy(cameraFocus[0], -cameraFocus[1]);
+        if (x !== location[0] || y !== location[1]) {
+          setLocation([x, y]);
+        }
+
+        pointerDirection[0] = 0;
+        pointerDirection[1] = 0;
+        started = false;
+        cameraFocus[0] = origin[0];
+        cameraFocus[1] = origin[1];
+        cameraFocus[2] = origin[2];
+      }
+    };
+
     document.addEventListener("mousemove", handleMove);
     document.addEventListener("mouseup", handleStop);
-    document.addEventListener("touchstart", handleStart);
     document.addEventListener("touchmove", handleMove);
     document.addEventListener("touchend", handleStop);
 
     return () => {
       document.removeEventListener("mousemove", handleMove);
       document.removeEventListener("mouseup", handleStop);
-      document.removeEventListener("touchstart", handleStart);
       document.removeEventListener("touchmove", handleMove);
       document.removeEventListener("touchend", handleStop);
     };
