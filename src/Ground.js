@@ -266,7 +266,7 @@ export const drawGround = {
           coordinates.x * 3.0 + coordinates.y * 7.0 
           + dot(normalize(position), vec2(0.0, 1.0)), 
           worldPosition.z
-        ) * vec2(0.5, 0.034)
+        ) * vec2(1.0, 0.021)
         : uv.xy;
       
       uv.xy *= 5.0;
@@ -371,13 +371,16 @@ export const drawGround = {
       
       // Texture
       vec3 textureColor = mix(shadowColor, lightColor, isFlooded);
-      float posture = clamp(dot(vec2(fX(noise), fY(noise)), vec2(0.0, -1.0)) * 5.0 + isExtension, 0.0, 1.0);
-      color = mix(color, textureColor, fEdge(0.5, noise) * posture);
-      // color = mix(color, textureColor, fStep(0.999, posture) * notExtension);
+      float posture = clamp(dot(vec2(fX(noise), fY(noise)), vec2(0.0, -1.0)) * 5.0, 0.0, 1.0);
+      color = mix(color, textureColor, fEdge(0.5, noise) * posture * notExtension);
+      
+      color = mix(color, shadowColor, 0.056 * isExtension * max(0.0, round(noise)));
+      color = mix(color, shadowColor, 0.09 * isExtension * max(0.0, round(-noise)));
 
       // Outline
       float outlineness = fStep(0.9787101863, outlineEffect) * fStep(0.056, edgeUv.z);
       outlineness += fEdge(shadowVolumeThreshold, shadow) * 0.618;
+      outlineness += fEdge(0.5, abs(noise)) * isExtension * 0.618;
       outlineness = clamp(outlineness, 0.0, 1.0);
       color = mix(color, shadowColor, outlineness);
 
