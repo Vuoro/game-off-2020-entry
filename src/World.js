@@ -107,6 +107,10 @@ export const getTile = (x, y) => {
     1 - abs(noise(coordinates, 0.003) * 2 - 1) >
     0.944 - noise(coordinates, 0.01) * 0.146;
 
+  if (flooded) {
+    height = clamp(height - tileBlendingThreshold * 2, 0, 1);
+  }
+
   return {
     coordinates,
     pixelCoordinates,
