@@ -235,8 +235,7 @@ export const divide = (a, b, out = []) => {
 };
 
 // https://stackoverflow.com/questions/2259476/rotating-a-point-about-another-point-2d/2259502#2259502
-export const rotate = (point, degrees = 0, around = vec2, out = [...point]) => {
-  const angle = -degrees * (PI / 180);
+export const rotate = (point, angle = 0, around = vec2, out = [...point]) => {
   const angleCos = cos(angle);
   const angleSin = sin(angle);
   out[0] =

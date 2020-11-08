@@ -32,3 +32,20 @@ html {
     opacity: 1;
   }
 }
+
+.interaction {
+  position: fixed;
+  left: 0;
+  height: 50vh;
+  width: 100vw;
+  background: none;
+  appearance: none;
+}
+
+.interaction.top {
+  top: 0;
+}
+
+.interaction.bottom {
+  bottom: 0;
+}

@@ -15,11 +15,11 @@ import { useScroller } from "./helpers/useScroller.js";
 
 const { abs, PI } = Math;
 
-const viewRadius = 16;
-const cameraFocus = [0, 0, 0];
-const cameraOffset = 8;
-const cameraHeight = 21;
-let cameraAngle = 0;
+export const viewRadius = 16;
+export const cameraFocus = [0, 0, 0];
+export const cameraOffset = 8;
+export const cameraHeight = 21;
+export let cameraAngle = 0;
 
 export const waterLevel = 0.5;
 export const heightScale = 8;
@@ -28,9 +28,11 @@ export const tileBlendingThreshold = 0.146;
 const World = () => {
   const [location, setLocation] = useState([0, 0]);
   const tile = getTile(location[0], location[1]);
+  console.log(tile);
+
   cameraFocus[0] = tile.pixelCoordinates[0];
-  cameraFocus[1] = tile.pixelCoordinates[0];
-  cameraFocus[2] = tile.height * heightScale;
+  cameraFocus[1] = tile.pixelCoordinates[1];
+  cameraFocus[2] = tile.height * heightScale + 0.01;
 
   const { updateAllUniforms, setClear, clear } = useRenderer();
   const camera = useCamera();
@@ -53,14 +55,12 @@ const World = () => {
   }, [camera, updateAllUniforms]);
 
   useEffect(() => {
-    handleCamera();
     window.addEventListener("resize", handleCamera);
     return () => window.removeEventListener("resize", handleCamera);
   }, [handleCamera]);
 
   const handleScroll = ({ distanceChange }) => {
     cameraAngle -= (distanceChange / 500) % (PI * 2);
-    handleCamera();
   };
   useScroller(undefined, handleScroll, true);
 
@@ -70,6 +70,7 @@ const World = () => {
   });
 
   useLoop((timestamp, clock, frameNumber) => {
+    handleCamera();
     updateAllUniforms("time", clock / 1000);
     updateAllUniforms("cameraFocus", cameraFocus);
     clear();
@@ -79,10 +80,14 @@ const World = () => {
     <>
       <div style={{ height: "1000vmax", width: "1000vmax" }} />
 
-      <Swiper x={cameraFocus[0]} y={cameraFocus[1]} z={cameraFocus[2]} />
+      <Swiper
+        cameraFocus={cameraFocus}
+        location={location}
+        setLocation={setLocation}
+      />
 
-      {hexesInRadius(viewRadius).map((hex) => (
-        <Ground key={hex} x={hex[0]} y={hex[1]} />
+      {hexesInRadius(viewRadius, tile.coordinates).map((hex) => (
+        <Ground key={hex.join(",")} x={hex[0]} y={hex[1]} />
       ))}
     </>
   );

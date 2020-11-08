@@ -272,7 +272,6 @@ const createCommand = (
         { buffer, dimensions, BYTES_PER_ELEMENT, instancesNeedingUpdate },
       ] of buffers) {
         if (instancesNeedingUpdate.size > 0) {
-          // console.log("updating", attribute, instancesNeedingUpdate.size);
           gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
           for (const instance of instancesNeedingUpdate) {
@@ -280,7 +279,7 @@ const createCommand = (
             gl.bufferSubData(
               gl.ARRAY_BUFFER,
               BYTES_PER_ELEMENT * dimensions * instance.offset,
-              value.length ? value : new Float32Array([value])
+              value.length ? new Float32Array(value) : new Float32Array([value])
             );
           }
 
