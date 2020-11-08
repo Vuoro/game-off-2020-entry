@@ -11,7 +11,7 @@ import { useScroller } from "./helpers/useScroller.js";
 
 const { abs, PI } = Math;
 
-export const viewRadius = 24;
+export const viewRadius = 32;
 export const cameraFocus = [0, 0, 0];
 export const cameraHeight = 414;
 export const cameraOffset = cameraHeight * 1;
@@ -104,8 +104,8 @@ export const getTile = (x, y) => {
   let height = noise(pixelCoordinates);
 
   const flooded =
-    1 - abs(noise(coordinates, 0.001) * 2 - 1) >
-    0.99 - noise(coordinates, 0.01) * 0.09;
+    1 - abs(noise(coordinates, 0.003) * 2 - 1) >
+    0.944 - noise(coordinates, 0.01) * 0.146;
 
   return {
     coordinates,
