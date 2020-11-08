@@ -53,7 +53,14 @@ const Reticle = ({ cameraFocus, setLocation, location }) => {
     update("location");
   });
 
-  const handleStart = (event) => {
+  const handleTopStart = (event) => {
+    if (!event.touches) {
+      setPointerStart(event);
+      started = true;
+    }
+  };
+
+  const handleBottomStart = (event) => {
     setPointerStart(event);
     started = true;
   };
@@ -100,14 +107,14 @@ const Reticle = ({ cameraFocus, setLocation, location }) => {
     <>
       <Reticle ref={reticleRef} location={[...cameraFocus]} />
       <button
-        onMouseDown={handleStart}
-        onTouchStart={handleStart}
+        onMouseDown={handleTopStart}
+        onTouchStart={handleTopStart}
         type="button"
         className="interaction top"
       ></button>
       <button
-        onMouseDown={handleStart}
-        onTouchStart={handleStart}
+        onMouseDown={handleBottomStart}
+        onTouchStart={handleBottomStart}
         type="button"
         className="interaction bottom"
       ></button>

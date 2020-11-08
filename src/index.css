@@ -36,7 +36,7 @@ html {
 .interaction {
   position: fixed;
   left: 0;
-  height: 50vh;
+  height: 50%;
   width: 100vw;
   background: none;
   appearance: none;
@@ -48,4 +48,5 @@ html {
 
 .interaction.bottom {
   bottom: 0;
+  touch-action: none;
 }
