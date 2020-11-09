@@ -1,36 +1,44 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import SimplexNoise from "simplex-noise";
 
 import Ground from "./Ground.js";
 import Swiper from "./Swiper.js";
 import { useCamera } from "./Camera.js";
 import { useRenderer, useLoop } from "./WebGL.js";
-import { pointOnCircle, normalizeInPlace, clamp } from "./helpers/maths.js";
+import {
+  pointOnCircle,
+  normalizeInPlace,
+  clamp,
+  mix,
+} from "./helpers/maths.js";
 import { hexesInRadius, pointyToPixel } from "./helpers/hexes.js";
 import { useScroller } from "./helpers/useScroller.js";
 
 const { abs, PI } = Math;
 
 export const viewRadius = 32;
-export const cameraFocus = [0, 0, 0];
-export const cameraHeight = 414;
+export const cameraHeight = 382;
 export const cameraOffset = cameraHeight * 1;
+export const cameraTiltOffset = 0.01; // super magic number
 export let cameraAngle = 0;
 
 export const heightScale = 8;
 export const tileBlendingThreshold = 0.146;
 
 const World = () => {
+  const { updateAllUniforms, setClear, clear } = useRenderer();
+
   const [location, setLocation] = useState([0, 0]);
   const tile = getTile(location[0], location[1]);
-  console.log(tile);
 
-  cameraFocus[0] = tile.pixelCoordinates[0];
-  cameraFocus[1] = tile.pixelCoordinates[1];
-  cameraFocus[2] = tile.height * heightScale + 0.01;
-
-  const { updateAllUniforms, setClear, clear } = useRenderer();
   const camera = useCamera();
+
+  const cameraTarget = [
+    tile.pixelCoordinates[0],
+    tile.pixelCoordinates[1],
+    tile.height * heightScale,
+  ];
+  const cameraFocus = useRef([...cameraTarget]).current;
 
   const handleCamera = useCallback(() => {
     pointOnCircle(cameraOffset, cameraAngle, camera.position);
@@ -41,13 +49,13 @@ const World = () => {
     camera.up[0] = 0;
     camera.up[1] = 0;
     camera.up[2] = 1;
-    camera.direction[2] += 0.01;
+    camera.direction[2] += cameraTiltOffset;
     normalizeInPlace(camera.direction);
     camera.update();
 
     updateAllUniforms("projectionView", camera.projView);
     updateAllUniforms("cameraPosition", camera.position);
-  }, [camera, updateAllUniforms]);
+  }, [camera, updateAllUniforms, cameraFocus]);
 
   useEffect(() => {
     window.addEventListener("resize", handleCamera);
@@ -65,6 +73,7 @@ const World = () => {
   });
 
   useLoop((timestamp, clock, frameNumber) => {
+    mix(cameraFocus, cameraTarget, 0.1, cameraFocus);
     handleCamera();
     updateAllUniforms("time", clock / 1000);
     updateAllUniforms("cameraFocus", cameraFocus);
@@ -75,11 +84,7 @@ const World = () => {
     <>
       <div style={{ height: "1000vmax", width: "1000vmax" }} />
 
-      <Swiper
-        cameraFocus={cameraFocus}
-        location={location}
-        setLocation={setLocation}
-      />
+      <Swiper tile={tile} setLocation={setLocation} heightScale={heightScale} />
 
       {hexesInRadius(viewRadius, tile.coordinates).map((hex) => (
         <Ground key={hex.join(",")} x={hex[0]} y={hex[1]} />

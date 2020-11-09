@@ -1,12 +1,18 @@
 import { useRef, useEffect } from "react";
 
-import { pointOnCircle, mix, normalize, rotate } from "./helpers/maths.js";
+import {
+  pointOnCircle,
+  mix,
+  normalize,
+  rotate,
+  length,
+} from "./helpers/maths.js";
 import { pixelToPointy } from "./helpers/hexes.js";
 import { useCommand } from "./Command.js";
 import { useLoop } from "./WebGL.js";
 import { useCamera } from "./Camera.js";
 
-const { PI } = Math;
+const { PI, min } = Math;
 
 const pointerStart = [0, 0];
 const pointerDirection = [0, 0];
@@ -22,14 +28,19 @@ const setPointerStart = (event) => {
 
 const setPointerDirection = (event) => {
   const { clientX, clientY } = event.touches ? event.changedTouches[0] : event;
-  pointerDirection[0] = clientX - pointerStart[0];
-  pointerDirection[1] = clientY - pointerStart[1];
+  pointerDirection[0] =
+    ((clientX - pointerStart[0]) / min(window.innerWidth, window.innerHeight)) *
+    5;
+  pointerDirection[1] =
+    ((clientY - pointerStart[1]) / min(window.innerWidth, window.innerHeight)) *
+    5;
 };
 
-const Reticle = ({ cameraFocus, setLocation, location }) => {
+const Reticle = ({ setLocation, tile, heightScale }) => {
   const Reticle = useCommand(drawReticle);
   const reticleRef = useRef();
-  const origin = [...cameraFocus];
+  const origin = [...tile.pixelCoordinates, tile.height * heightScale];
+  const target = [...origin];
   const { direction } = useCamera();
 
   useLoop(() => {
@@ -40,6 +51,10 @@ const Reticle = ({ cameraFocus, setLocation, location }) => {
     cameraDirection[1] = direction[1];
     normalize(cameraDirection, cameraDirection);
 
+    if (length(pointerDirection) > 1) {
+      normalize(pointerDirection, pointerDirection);
+    }
+
     rotate(
       pointerDirection,
       -Math.atan2(cameraDirection[1], cameraDirection[0]) + PI / 2,
@@ -47,9 +62,9 @@ const Reticle = ({ cameraFocus, setLocation, location }) => {
       pointerWorldDirection
     );
 
-    cameraFocus[0] += pointerWorldDirection[0] * 0.005;
-    cameraFocus[1] -= pointerWorldDirection[1] * 0.005;
-    mix(location, cameraFocus, 0.91, location);
+    target[0] = origin[0] + pointerWorldDirection[0] * 2;
+    target[1] = origin[1] - pointerWorldDirection[1] * 2;
+    mix(location, target, 0.91, location);
     update("location");
   });
 
@@ -76,17 +91,18 @@ const Reticle = ({ cameraFocus, setLocation, location }) => {
       if (started) {
         setPointerDirection(event);
 
-        const [x, y] = pixelToPointy(cameraFocus[0], -cameraFocus[1]);
-        if (x !== location[0] || y !== location[1]) {
+        const [x, y] = pixelToPointy(target[0], target[1], 2);
+        console.log(tile.coordinates, x, y);
+        if (x !== tile.coordinates[0] || y !== tile.coordinates[1]) {
           setLocation([x, y]);
         }
 
         pointerDirection[0] = 0;
         pointerDirection[1] = 0;
         started = false;
-        cameraFocus[0] = origin[0];
-        cameraFocus[1] = origin[1];
-        cameraFocus[2] = origin[2];
+        target[0] = origin[0];
+        target[1] = origin[1];
+        target[2] = origin[2];
       }
     };
 
@@ -105,7 +121,7 @@ const Reticle = ({ cameraFocus, setLocation, location }) => {
 
   return (
     <>
-      <Reticle ref={reticleRef} location={[...cameraFocus]} />
+      <Reticle ref={reticleRef} location={[...origin]} />
       <button
         onMouseDown={handleTopStart}
         onTouchStart={handleTopStart}
@@ -134,6 +150,7 @@ export const drawReticle = {
     ],
   },
   order: 10,
+  depth: false,
   mode: "TRIANGLE_FAN",
   // prettier-ignore
   vertex: (`
