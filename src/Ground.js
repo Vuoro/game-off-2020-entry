@@ -165,6 +165,7 @@ export const drawGround = {
     attribute highp float flooded;
     uniform highp mat4 projectionView;
     uniform highp vec3 cameraPosition;
+    uniform highp vec3 cameraFocus;
     uniform highp float time;
     uniform highp vec3 light;
     varying highp vec3 uv;
@@ -302,9 +303,9 @@ export const drawGround = {
       float lightEffect = dot(light, normal);
 
       // Camera effects
-      // vec3 cameraToTile = worldPosition - cameraPosition;
-      // vec3 cameraToTileDirection = normalize(cameraToTile);
-      // float cameraDistance = length(cameraToTile);
+      vec3 cameraToTile = normalize(worldPosition - cameraPosition);
+      vec3 focusToTile = normalize(worldPosition - cameraFocus);
+      float gradientDirection = dot(cameraToTile, focusToTile);
 
       // Clouds
       vec2 cloudOffset = vec2(-time * 0.013, 0.0);
@@ -313,8 +314,11 @@ export const drawGround = {
 
       lightEffects[0] = lightEffect;
       lightEffects[1] = max(0.0, cloudNoise);
-      lightEffects[2] = 0.0;
-      lightEffects[3] = 0.0;
+      lightEffects[2] = max(0.0,
+        length(worldPosition - cameraFocus) * 0.02
+        * gradientDirection
+      );
+      lightEffects[3] = (worldPosition.z - cameraFocus.z) * 0.056;
 
       gl_Position = projectionView * vec4(worldPosition, 1.0);
     }
@@ -344,6 +348,8 @@ export const drawGround = {
 
       float lightEffect = lightEffects[0];
       float cloudShadow = lightEffects[1];
+      float distance = lightEffects[2];
+      float elevation = lightEffects[3];
 
       float noise = simplexNoise2d(uv.xy);
       
@@ -358,16 +364,18 @@ export const drawGround = {
       const vec3 lightColor = vec3(234.0/255.0, 232.0/255.0, 220.0/255.0);
       const vec3 shadowColor = vec3(50.0/255.0, 32.0/255.0, 62.0/255.0);
       const vec3 rockColor = vec3(129.0/255.0, 152.0/255.0, 199.0/255.0);
-      const vec3 waterColor = vec3(97.0/255.0, 194.0/255.0, 212.0/255.0);
+      const vec3 waterColor = vec3(97.0/255.0, 158.0/255.0, 194.0/255.0);
       vec3 color = mix(lightColor, rockColor, isExtension);
       color = mix(color, waterColor, isFlooded);
+      
+      // Elevation gradients
+      color = mix(color, lightColor, max(0.0, elevation));
+      color = mix(color, shadowColor, max(0.0, -elevation));
 
       // Light
-      color = mix(color, color * lightColor * (1.0 + light), light * 0.236);
-      color = mix(color, color * shadowColor, shadow * 0.236);
       const float shadowVolumeThreshold = 0.5;
       float shadowVolume = fStep(shadowVolumeThreshold, shadow);
-      color = mix(color, shadowColor, shadowVolume * 0.5);
+      color = mix(color, color * shadowColor, (0.236 + shadow * 0.5) * shadowVolume);
       
       // Texture
       vec3 textureColor = mix(shadowColor, lightColor, isFlooded);
@@ -383,6 +391,9 @@ export const drawGround = {
       outlineness += fEdge(0.5, abs(noise)) * isExtension * 0.618;
       outlineness = clamp(outlineness, 0.0, 1.0);
       color = mix(color, shadowColor, outlineness);
+      
+      // Fog gradients
+      color = mix(color, lightColor, max(0.0, distance) * max(0.0, distance));
 
       gl_FragColor = vec4(color, 1);
     }
